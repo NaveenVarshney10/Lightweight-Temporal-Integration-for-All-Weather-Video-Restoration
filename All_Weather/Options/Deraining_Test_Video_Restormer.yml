@@ -14,12 +14,8 @@ datasets:
   test_Rain100:
     name: Rain100_Test
     type: RainVideoDataset           # Use your custom clip dataset
-    dataroot_gt: D:\DATASETS\RainMotion_Test\Test_GT
-    #dataroot_gt: D:\DATASETS\REVIDE_Test\gt
-    #D:\DATASETS\RVSD_8sample\target  D:\DATASETS\Kitti_Snow_Test\Test          #D:\DATASETS\RainMotion_Test\Test_GT   #D:\DATASETS\REVIDE_Test\gt  #D:\DATASETS\RVSD_Test\clean
-    dataroot_lq: D:\DATASETS\RainMotion_Test\Test
-    #dataroot_lq: 
-    #D:\DATASETS\RVSD_8sample\input  #D:\DATASETS\Kitti_Snow_Test\Test            #D:\DATASETS\RainMotion_Test\Test      #
+    dataroot_gt: Test_Dataset\gt
+    dataroot_lq: Test_Dataset\input
     io_backend:
       type: disk
     num_frame: 10                    # Include the frames-per-clip parameter
