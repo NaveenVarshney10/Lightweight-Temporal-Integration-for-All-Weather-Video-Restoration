@@ -1,0 +1,172 @@
+# general settings
+name: Deraining_Restormer_Video_Clip_Train
+model_type: ImageCleanModel
+scale: 1
+num_gpu: 1
+manual_seed: 100
+
+#----------------------------------------------------------------------
+# dataset and data loader settings
+datasets:
+  train:
+    name: TrainSet
+    type: RainVideoDataset
+    dataroot_gt: ./Deraining/Datasets/train/Rain13K/target
+    dataroot_lq: ./Deraining/Datasets/train/Rain13K/input
+    geometric_augs: false
+    
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+    use_shuffle: true
+    num_worker_per_gpu: 1
+    batch_size_per_gpu: 1
+
+    num_frame: 10
+
+    mini_batch_sizes: [1]
+    iters: [300000]
+    gt_size: 256
+    gt_sizes: [256]
+
+    dataset_enlarge_ratio: 1
+    prefetch_mode: 'cpu'
+
+  val:
+    name: ValSet
+    type: RainVideoDataset
+    dataroot_gt: D:\NAVEEN\Database\Processed_DAY_Database\REVIDE_Test\gt
+    dataroot_lq: D:\NAVEEN\Database\Processed_DAY_Database\REVIDE_Test\hazy
+    io_backend:
+      type: disk
+
+#----------------------------------------------------------------------
+# network structures
+network_g:
+  type: Restormer
+  inp_channels: 3
+  out_channels: 3
+  dim: 12
+  num_blocks: [2,3,3,4]
+  num_refinement_blocks: 4
+  heads: [1,1,1,1]
+  ffn_expansion_factor: 2.66
+  bias: False
+  LayerNorm_type: WithBias
+  dual_pixel_task: False
+
+#----------------------------------------------------------------------
+# path settings
+path:
+  root: ~
+  experiments_root: ./experiments
+  models: models
+  training_state: training_state
+
+  pretrain_network_g: ~
+  strict_load_g: true
+  resume_state: ~
+
+#----------------------------------------------------------------------
+# training settings
+train:
+  total_iter: 600000
+  warmup_iter: -1
+  use_grad_clip: true
+
+  scheduler:
+    type: CosineAnnealingRestartCyclicLR
+    periods: [92000, 408000, 100000]
+    restart_weights: [1,1,0.5]
+    eta_mins: [0.0003,0.00001,0.000001]
+
+  mixing_augs:
+    mixup: false
+    mixup_beta: 1.2
+    use_identity: true
+
+  optim_g:
+    type: AdamW
+    lr: !!float 3e-4
+    weight_decay: !!float 1e-4
+    betas: [0.9, 0.999]
+
+  # ⭐ LOSS FUNCTIONS
+  # Primary reconstruction loss
+  pixel_opt:
+    type: MSELoss
+    loss_weight: 1
+    reduction: mean
+
+  # ⭐ SSIM Loss for structural similarity
+  ssim_opt:
+    type: SSIMLoss
+    loss_weight: 1
+    window_size: 11
+
+  # ⭐ Perceptual Loss for perceptual quality
+  perceptual_opt:
+    type: PerceptualLoss
+    loss_weight: 0.5, 0.1, 0.05
+    layer: relu1_2, relu2_2, relu3_3
+    use_input_norm: true
+
+  # ⭐ Histogram Loss for color distribution
+  histogram_opt:
+    type: HistogramLoss
+    loss_weight: 0.5
+    num_bins: 64
+    bandwidth: 0.01  
+    per_channel: true
+
+  # ⭐ NEW: VGG Contrastive Loss
+  # Pushes restored image toward GT and away from degraded input in VGG feature space
+  contrastive_opt:
+    type: VGGContrastiveLoss
+    loss_weight: 0.2, 0.1, 0.05  # Single weight for single layer, or comma-separated for multi-layer
+    layer: relu1_2, relu2_2, relu3_3  # Shallow layer for texture artifacts
+    loss_type: ratio  # 'ratio' or 'margin'
+    distance_norm: l1  # 'l1' or 'l2'
+    use_input_norm: true
+    reduction: mean
+    
+    # Optional for margin loss:
+    # margin: 1.0  # Only used if loss_type='margin'
+
+ 
+
+#----------------------------------------------------------------------
+# validation settings
+val:
+  window_size: 8
+  val_freq: !!float 200
+  save_img: false
+  rgb2bgr: true
+  use_image: true
+  max_minibatch: 8
+
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: true
+    ssim:
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: true
+     
+#----------------------------------------------------------------------
+# logging settings
+logger:
+  print_freq: 20
+  save_checkpoint_freq: !!float 200
+  use_tb_logger: true
+  wandb:
+    project: ~
+    resume_id: ~
+
+#----------------------------------------------------------------------
+dist_params:
+  backend: gloo
+  port: 29500
