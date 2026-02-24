@@ -1,0 +1,88 @@
+# test_restormer_clips_config.yml
+
+# general settings
+name: Test_Restormer_Clips
+model_type: ImageCleanModel
+scale: 1
+num_gpu: 1
+manual_seed: 100
+
+
+# dataset and data loader settings
+# MUST ONLY contain datasets for testing (e.g., test_1, test_2...)
+datasets:
+  test_Rain100:
+    name: Rain100_Test
+    type: RainVideoDataset           # Use your custom clip dataset
+    dataroot_gt: D:\DATASETS\RainMotion_Test\Test_GT
+    #dataroot_gt: D:\DATASETS\REVIDE_Test\gt
+    #D:\DATASETS\RVSD_8sample\target  D:\DATASETS\Kitti_Snow_Test\Test          #D:\DATASETS\RainMotion_Test\Test_GT   #D:\DATASETS\REVIDE_Test\gt  #D:\DATASETS\RVSD_Test\clean
+    dataroot_lq: D:\DATASETS\RainMotion_Test\Test
+    #dataroot_lq: 
+    #D:\DATASETS\RVSD_8sample\input  #D:\DATASETS\Kitti_Snow_Test\Test            #D:\DATASETS\RainMotion_Test\Test      #
+    io_backend:
+      type: disk
+    num_frame: 10                    # Include the frames-per-clip parameter
+    # Test-time data loader options (optional)
+    batch_size_per_gpu: 1
+    num_worker_per_gpu: 1
+    
+
+# network structures (Must match the training network exactly)
+network_g:
+  type: Restormer
+  inp_channels: 3
+  out_channels: 3
+  dim: 12
+  num_blocks: [2,3,3,4]
+  num_refinement_blocks: 4
+  heads: [1,1,1,1]
+  ffn_expansion_factor: 2.66
+  bias: False
+  LayerNorm_type: WithBias
+  dual_pixel_task: False
+
+
+# path
+path:
+  # 🛑 MANDATORY: Specify the path to your trained weights for testing
+  pretrain_network_g: D:\NAVEEN\WorkDone\ICME\Code\Checkpoint\net_g_576200.pth
+  strict_load_g: true
+  resume_state: ~ # Not used for testing
+
+
+# 🟢 FIX: Added minimal 'train' section to prevent KeyError in ImageCleanModel
+train:
+  mixing_augs:
+    mixup: false
+
+
+# validation settings (Used for testing metrics and image saving)
+val:
+  window_size: 8
+  save_img: true
+  rgb2bgr: true
+  use_image: true
+  max_minibatch: 8 # Max batch size for validation (frames per GPU)
+  
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: true
+    
+    ssim:
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: true
+     
+
+
+# logging settings (Minimal logging for testing)
+logger:
+  print_freq: 20
+
+# dist training settings (Only used if multi-GPU testing is desired)
+dist_params:
+  backend: gloo
+  port: 29500
