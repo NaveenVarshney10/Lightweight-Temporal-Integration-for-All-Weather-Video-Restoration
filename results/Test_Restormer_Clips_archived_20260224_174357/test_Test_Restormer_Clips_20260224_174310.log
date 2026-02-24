@@ -1,0 +1,97 @@
+2026-02-24 17:43:10,867 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 1.2.0+06efce8
+	PyTorch: 2.5.1
+	TorchVision: 0.20.1
+2026-02-24 17:43:10,868 INFO: 
+  name: Test_Restormer_Clips
+  model_type: ImageCleanModel
+  scale: 1
+  num_gpu: 1
+  manual_seed: 100
+  datasets:[
+    test_Rain100:[
+      name: Rain100_Test
+      type: RainVideoDataset
+      dataroot_gt: Test_Dataset\gt
+      dataroot_lq: Test_Dataset\input
+      io_backend:[
+        type: disk
+      ]
+      num_frame: 10
+      batch_size_per_gpu: 1
+      num_worker_per_gpu: 1
+      phase: test
+      scale: 1
+    ]
+  ]
+  network_g:[
+    type: Restormer
+    inp_channels: 3
+    out_channels: 3
+    dim: 12
+    num_blocks: [2, 3, 3, 4]
+    num_refinement_blocks: 4
+    heads: [1, 1, 1, 1]
+    ffn_expansion_factor: 2.66
+    bias: False
+    LayerNorm_type: WithBias
+    dual_pixel_task: False
+  ]
+  path:[
+    pretrain_network_g: Checkpoint\net_g_576200.pth
+    strict_load_g: True
+    resume_state: None
+    root: d:\naveen\workdone\icme\github
+    results_root: d:\naveen\workdone\icme\github\results\Test_Restormer_Clips
+    log: d:\naveen\workdone\icme\github\results\Test_Restormer_Clips
+    visualization: d:\naveen\workdone\icme\github\results\Test_Restormer_Clips\visualization
+  ]
+  train:[
+    mixing_augs:[
+      mixup: False
+    ]
+  ]
+  val:[
+    window_size: 8
+    save_img: True
+    rgb2bgr: True
+    use_image: True
+    max_minibatch: 8
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 0
+        test_y_channel: True
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 0
+        test_y_channel: True
+      ]
+    ]
+  ]
+  logger:[
+    print_freq: 20
+  ]
+  dist_params:[
+    backend: gloo
+    port: 29500
+  ]
+  is_train: False
+  dist: False
+  rank: 0
+  world_size: 1
+
+2026-02-24 17:43:10,869 INFO: Scanning for video clips in Test_Dataset\input...

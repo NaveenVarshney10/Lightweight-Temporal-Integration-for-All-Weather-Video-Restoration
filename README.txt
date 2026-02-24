@@ -1,3 +1,4 @@
+Ours sample results for all categories can be seen under the folder "Visual Results"
 
 To test our model, do following steps:
 
@@ -15,6 +16,6 @@ Test_Dataset/
     ├── 002/ (contains 10 images)
     └── ...
 
-3. python basicsr/test.py -opt All_Weather/Options/Deraining_Test_Video_Restormer.yml --launcher none
+3. python basicsr/test.py -opt All_Weather/Options/Test_Video.yml --launcher none
 
 4. Results will saved in results folder
