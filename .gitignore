@@ -1,9 +1,7 @@
 .ipynb_checkpoints/
 *.pyc
-*.png
 *.tif
 *.jpg
-*.pth
 *.mat
 *.npy
 .DS_Store
