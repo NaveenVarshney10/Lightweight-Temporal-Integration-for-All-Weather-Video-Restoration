@@ -42,7 +42,7 @@ network_g:
 # path
 path:
   # 🛑 MANDATORY: Specify the path to your trained weights for testing
-  pretrain_network_g: D:\NAVEEN\WorkDone\ICME\Code\Checkpoint\net_g_576200.pth
+  pretrain_network_g: Checkpoint\net_g_576200.pth
   strict_load_g: true
   resume_state: ~ # Not used for testing
 
