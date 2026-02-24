@@ -19,3 +19,8 @@ Test_Dataset/
 3. python basicsr/test.py -opt All_Weather/Options/Test_Video.yml --launcher none
 
 4. Results will saved in results folder
+
+
+
+Acknowledgements
+The codes are based on BasicSR (https://github.com/XPixelGroup/BasicSR). Thanks the authors for their codes!
